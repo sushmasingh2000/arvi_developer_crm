@@ -2,8 +2,8 @@
 // export const domain = "http://192.168.18.101:9044"
 // export const frontend = "http://192.168.18.101:3000"
 
-export const domain = "https://ferryinfotech.in"
-export const frontend = "https://ferryinfotech.in"
+export const domain = "https://lead.arvideveloper.com"
+export const frontend = "https://lead.arvideveloper.com"
 
 
 export const API_URLS = {
