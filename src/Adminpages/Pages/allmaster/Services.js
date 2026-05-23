@@ -23,7 +23,6 @@ const ServiceTypeMaster = () => {
   const [editData, setEditData] = useState(null);
   const [page, setPage] = useState(1);
 
-  /* ================= FILTER FORM ================= */
   const filterFormik = useFormik({
     initialValues: {
       search: "",
@@ -34,43 +33,32 @@ const ServiceTypeMaster = () => {
 
   const { isLoading, data: serviceList } = useQuery(
     ["get_service_type_master", page, filterFormik.values.search],
-    () =>
-      axiosInstance.post(API_URLS.get_service_type, {
-          search: filterFormik.values.search,
-          page,
-          count: 10,
-      }),
-    {
-      refetchOnWindowFocus: false,
-    }
+    () => axiosInstance.post(API_URLS.get_service_type, {
+      search: filterFormik.values.search,
+      page,
+      count: 10,
+    }),
+    { refetchOnWindowFocus: false }
   );
 
   const services = serviceList?.data?.response || [];
 
-  /* ================= ADD / EDIT FORM ================= */
   const fk = useFormik({
-    initialValues: {
-      name: "",
-      desc: "",
-    },
+    initialValues: { name: "", desc: "" },
     onSubmit: async (values) => {
       if (editData) return updateService(values);
       return createService(values);
     },
   });
 
-  /* ================= CREATE ================= */
   const createService = async (values) => {
-      if(!values?.name){
-      return toast("Please Enter Service  Name")
-    }
+    if (!values?.name) return toast("Please Enter Service Name");
     try {
       const res = await axiosInstance.post(API_URLS.create_service_type, {
         service_type_name: values.name,
         service_type_desc: values.desc,
         service_type_status: "1",
       });
-
       toast(res?.data?.msg);
       if (res?.data?.success) {
         queryClient.invalidateQueries("get_service_type_master");
@@ -81,7 +69,6 @@ const ServiceTypeMaster = () => {
     }
   };
 
-  /* ================= UPDATE ================= */
   const updateService = async (values) => {
     try {
       const res = await axiosInstance.post(API_URLS.update_service_type, {
@@ -90,7 +77,6 @@ const ServiceTypeMaster = () => {
         service_type_desc: values.desc,
         service_type_status: String(editData.service_type_status),
       });
-
       toast(res?.data?.msg);
       if (res?.data?.success) {
         queryClient.invalidateQueries("get_service_type_master");
@@ -103,43 +89,25 @@ const ServiceTypeMaster = () => {
 
   const toggleStatus = async (row) => {
     try {
-      const res = await axiosInstance.post(
-        API_URLS.update_service_type_status,
-        { service_type_id: row.service_type_id }
-      );
-
+      const res = await axiosInstance.post(API_URLS.update_service_type_status, {
+        service_type_id: row.service_type_id,
+      });
       toast(res?.data?.msg);
-      if (res?.data?.success) {
-        queryClient.invalidateQueries("get_service_type_master");
-      }
+      if (res?.data?.success) queryClient.invalidateQueries("get_service_type_master");
     } catch {
       toast.error("Failed to update status");
     }
   };
 
-  /* ================= HANDLERS ================= */
-  const handleOpen = () => {
-    fk.resetForm();
-    setEditData(null);
-    setOpen(true);
-  };
-
+  const handleOpen = () => { fk.resetForm(); setEditData(null); setOpen(true); };
   const handleEdit = (row) => {
     setEditData(row);
-    fk.setValues({
-      name: row.service_type_name,
-      desc: row.service_type_desc,
-    });
+    fk.setValues({ name: row.service_type_name, desc: row.service_type_desc });
     setOpen(true);
   };
+  const handleClose = () => { setOpen(false); setEditData(null); };
 
-  const handleClose = () => {
-    setOpen(false);
-    setEditData(null);
-  };
-
-  /* ================= TABLE ================= */
-  const tablehead = ["S.No", "Name ", "Description" , "Status", "Actions", "Date"];
+  const tablehead = ["S.No", "Name", "Description", "Status", "Actions", "Date"];
 
   const tablerow = services?.data?.map((item, index) => [
     <span>{index + 1}</span>,
@@ -151,8 +119,9 @@ const ServiceTypeMaster = () => {
       color="success"
     />,
     <Tooltip title="Edit">
-      <IconButton onClick={() => handleEdit(item)}>
-        <Edit className="text-blue-600" />
+      {/* ✅ text-blue-600 → var(--primary) */}
+      <IconButton onClick={() => handleEdit(item)} sx={{ color: 'var(--primary)' }}>
+        <Edit />
       </IconButton>
     </Tooltip>,
     <span>{moment(item.created_at).format("DD-MM-YYYY")}</span>,
@@ -162,28 +131,30 @@ const ServiceTypeMaster = () => {
     <>
       <div className="mx-5">
         <div className="flex justify-between items-center p-4">
-          <p className="font-bold text-xl">Service  Master</p>
+          {/* ✅ heading color */}
+          <p className="font-bold text-xl" style={{ color: 'var(--text-main)' }}>
+            Service Master
+          </p>
+          {/* ✅ button gradient → var(--primary) */}
           <Button
             variant="contained"
             startIcon={<Add />}
             onClick={handleOpen}
-            className="!bg-gradient-to-b from-[#7981F9] to-[#5E60D0]"
+            sx={{
+              backgroundColor: 'var(--primary)',
+              '&:hover': { backgroundColor: 'var(--primary-hover)' },
+              color: '#000',
+              fontWeight: 600,
+            }}
           >
-            Add Service 
+            Add Service
           </Button>
         </div>
 
         <CustomFilter
           formik={filterFormik}
-          onFilter={() => {
-            setPage(1);
-            queryClient.invalidateQueries("get_service_type_master");
-          }}
-          onClear={() => {
-            filterFormik.resetForm();
-            setPage(1);
-            queryClient.invalidateQueries("get_service_type_master");
-          }}
+          onFilter={() => { setPage(1); queryClient.invalidateQueries("get_service_type_master"); }}
+          onClear={() => { filterFormik.resetForm(); setPage(1); queryClient.invalidateQueries("get_service_type_master"); }}
         />
 
         <CustomTable
@@ -203,10 +174,10 @@ const ServiceTypeMaster = () => {
         open={open}
         onClose={handleClose}
         onSubmit={fk.handleSubmit}
-        title={editData ? "Edit Service " : "Add Service "}
+        title={editData ? "Edit Service" : "Add Service"}
         formik={fk}
         fields={[
-          { name: "name", label: "Service  Name", type: "text" },
+          { name: "name", label: "Service Name", type: "text" },
           { name: "desc", label: "Description", type: "text" },
         ]}
       />

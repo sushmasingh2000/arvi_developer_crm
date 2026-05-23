@@ -16,17 +16,17 @@ const TodayFolowup = () => {
     const [openFollowup, setOpenFollowup] = useState(false);
     const [selectedLeadId, setSelectedLeadId] = useState(null);
     const [selectedLead, setSelectedLead] = useState(null);
+
     const { data: todayData, isLoading } = useQuery(
         ["today_followups", currentPage],
-        () =>
-            axiosInstance.post(API_URLS.today_lead_folowup, {
-                page: currentPage,
-                count: 5,
-            }),
+        () => axiosInstance.post(API_URLS.today_lead_folowup, {
+            page: currentPage,
+            count: 5,
+        }),
         { keepPreviousData: true }
     );
 
-    const followups = todayData?.data?.response || []; // 👈 FIXED
+    const followups = todayData?.data?.response || [];
 
     const tableHead = [
         "S.No.",
@@ -40,63 +40,70 @@ const TodayFolowup = () => {
 
     const tableRow = followups?.data?.map((f, idx) => [
         <span>{idx + 1 + (currentPage - 1) * 8}</span>,
-
         f.crm_lead_name || "--",
         f.crm_mobile || "--",
-
         f.crm_next_followup_date
             ? moment(f.crm_next_followup_date).format("YYYY-MM-DD")
             : "--",
-
         <Button
             onClick={() => {
-                setSelectedLead(f);   // 👈 full row store
+                setSelectedLead(f);
                 setSelectedLeadId(f.id);
                 setOpenFollowup(true);
             }}
+            sx={{ color: 'var(--primary)' }}
         >
-            <RemoveRedEye className="!text-blue-600" />
+            <RemoveRedEye />
         </Button>,
-
         f.followup_status_name || "--",
         <Tooltip title={f.crm_remark}>
-            <span>
-                {f.crm_remark?.slice(0, 30) || "--"}
-            </span>
+            <span>{f.crm_remark?.slice(0, 30) || "--"}</span>
         </Tooltip>
     ]);
 
     return (
         <div className="px-4">
-            <h2 className="mt-6 font-bold mb-4">Today Follow-ups</h2>
+            {/* ✅ heading color */}
+            <h2 className="mt-6 font-bold mb-4" style={{ color: 'var(--text-main)' }}>
+                Today Follow-ups
+            </h2>
 
-            {/* TABLE WRAPPER */}
             <CustomTable
                 tablehead={tableHead}
                 tablerow={tableRow}
                 isLoading={isLoading}
             />
 
-            {/* PAGINATION */}
             <CustomToPagination
                 page={currentPage}
                 setPage={setCurrentPage}
-                data={followups} // 👈 important fix
+                data={followups}
             />
 
-            {/* FOLLOWUP DIALOG */}
             <Dialog
                 open={openFollowup}
                 onClose={() => setOpenFollowup(false)}
                 fullWidth
                 maxWidth="md"
+                PaperProps={{
+                    style: {
+                        backgroundColor: 'var(--card-bg)',
+                        border: '1px solid var(--border)',
+                    }
+                }}
             >
-                <DialogTitle className="flex justify-between items-center">
-                    Follow-up <br/>
-                        {selectedLead?.crm_lead_name || "no name"}{" "}
-                        {selectedLead?.crm_mobile ? `(${selectedLead.crm_mobile})` : ""}
-                    
-                    <IconButton onClick={() => setOpenFollowup(false)}>
+                {/* ✅ dialog title color */}
+                <DialogTitle
+                    className="flex justify-between items-center"
+                    style={{ color: 'var(--text-main)' }}
+                >
+                    Follow-up <br />
+                    {selectedLead?.crm_lead_name || "no name"}{" "}
+                    {selectedLead?.crm_mobile ? `(${selectedLead.crm_mobile})` : ""}
+                    <IconButton
+                        onClick={() => setOpenFollowup(false)}
+                        style={{ color: 'var(--text-muted)' }}
+                    >
                         <Close />
                     </IconButton>
                 </DialogTitle>
@@ -108,6 +115,7 @@ const TodayFolowup = () => {
                         display: "flex",
                         flexDirection: "column",
                         padding: 0,
+                        borderColor: 'var(--border)',
                     }}
                 >
                     {selectedLeadId && <FollowupList leadId={selectedLeadId} />}

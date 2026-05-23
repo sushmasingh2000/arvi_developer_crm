@@ -8,6 +8,42 @@ import { API_URLS } from "../../config/APIUrls";
 import axiosInstance from "../../config/axios";
 import Loader from "../../Shared/Loader";
 
+const inputStyle = {
+    "& .MuiOutlinedInput-root": {
+        color: "var(--text-main)",
+        background: "var(--input-bg)",
+        borderRadius: "12px",
+
+        "& fieldset": {
+            borderColor: "var(--border)",
+        },
+
+        "&:hover fieldset": {
+            borderColor: "var(--primary)",
+        },
+
+        "&.Mui-focused fieldset": {
+            borderColor: "var(--primary)",
+        },
+    },
+
+    "& .MuiInputLabel-root": {
+        color: "var(--text-muted)",
+    },
+
+    "& .MuiInputLabel-root.Mui-focused": {
+        color: "var(--primary)",
+    },
+
+    "& .MuiFormHelperText-root": {
+        color: "#ff6b6b",
+    },
+
+    "& .MuiSvgIcon-root": {
+        color: "var(--primary)",
+    },
+};
+
 const CreateLead = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -15,9 +51,8 @@ const CreateLead = () => {
     const [existingLead, setExistingLead] = useState(null);
 
     const location = useLocation();
-    const lead = location.state?.lead || {}
+    const lead = location.state?.lead || {};
     const isEdit = Boolean(lead?.id);
-
 
     const fk = useFormik({
         initialValues: {
@@ -27,7 +62,7 @@ const CreateLead = () => {
             crm_email: lead?.crm_email || "",
             crm_service_type: lead?.crm_service_type || "",
             crm_requirement: lead?.crm_requirement || "",
-            crm_secondary_status: lead.crm_secondary_status || "",
+            crm_secondary_status: lead?.crm_secondary_status || "",
             crm_source: lead?.crm_source || "",
             crm_budget: lead?.crm_budget || "",
             crm_address: lead?.crm_address || "",
@@ -35,10 +70,19 @@ const CreateLead = () => {
 
         onSubmit: async (values) => {
             setLoading(true);
+
             try {
-                const payload = lead?.id ? { ...values, lead_id: lead.id } : values;
-                const res = await axiosInstance.post(API_URLS.create_leads, payload);
+                const payload = lead?.id
+                    ? { ...values, lead_id: lead.id }
+                    : values;
+
+                const res = await axiosInstance.post(
+                    API_URLS.create_leads,
+                    payload
+                );
+
                 toast(res.data.message, { id: 1 });
+
                 if (res.data.success) {
                     navigate("/leads");
                     fk.resetForm();
@@ -47,15 +91,18 @@ const CreateLead = () => {
                 console.error(e);
                 toast.error("Something went wrong");
             }
+
             setLoading(false);
         },
     });
 
     const handleMobileChange = async (e) => {
         const value = e.target.value;
+
         fk.setFieldValue("crm_mobile", value);
 
         const digits = value.replace(/\D/g, "");
+
         if (digits.length < 10) {
             setMobileError("");
             setExistingLead(null);
@@ -67,7 +114,7 @@ const CreateLead = () => {
                 API_URLS.check_mobile_exists,
                 {
                     mobile: value,
-                    lead_id: lead?.id || null
+                    lead_id: lead?.id || null,
                 }
             );
 
@@ -83,13 +130,12 @@ const CreateLead = () => {
         }
     };
 
-
     const { data: serviceList } = useQuery(
         ["get_service_type_master"],
         () =>
             axiosInstance.post(API_URLS.get_service_type, {
                 count: 10000000000,
-                status: 1
+                status: 1,
             }),
         {
             refetchOnWindowFocus: false,
@@ -98,35 +144,45 @@ const CreateLead = () => {
 
     const services = serviceList?.data?.response || [];
 
-    const { data: propertyList } = useQuery(
-        ["get_property_master"],
-        () =>
-            axiosInstance.post(API_URLS.get_property_master, {
-                count: 100000,
-                status: 1,
-            }),
-        { refetchOnWindowFocus: false }
-    );
-
-    const properties = propertyList?.data?.response || [];
-
-
     return (
-        <div className="flex justify-center items-center w-full p-5">
+        <div
+            className="flex justify-center items-center w-full p-5"
+            style={{
+                minHeight: "100vh",
+                background: "var(--bg-dark)",
+            }}
+        >
             <Loader isLoading={loading} />
-            <div className=" rounded-lg p-5 w-full lg:max-w-6xl bg-white bg-opacity-45">
-                <p className="text-center font-bold text-lg mb-5">
-                    {lead?.id ? "Update Lead" : "Create Lead"} </p>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            <div
+                className="w-full lg:max-w-6xl p-6 rounded-2xl border"
+                style={{
+                    background: "var(--card-bg)",
+                    borderColor: "var(--border)",
+                    backdropFilter: "blur(12px)",
+                    boxShadow: "0 0 20px rgba(0,0,0,0.4)",
+                }}
+            >
+                <p
+                    className="text-center text-3xl font-bold mb-8"
+                    style={{
+                        color: "var(--text-main)",
+                    }}
+                >
+                    {lead?.id ? "Update Lead" : "Create Lead"}
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
                     <TextField
                         fullWidth
                         label="Client Name"
                         name="crm_lead_name"
                         value={fk.values.crm_lead_name}
                         onChange={fk.handleChange}
-                        error={fk.touched.crm_lead_name && Boolean(fk.errors.crm_lead_name)}
-                        helperText={fk.touched.crm_lead_name && fk.errors.crm_lead_name}
+                        sx={inputStyle}
                     />
+
                     <TextField
                         fullWidth
                         label="Mobile"
@@ -138,39 +194,45 @@ const CreateLead = () => {
                             mobileError && (
                                 <span>
                                     {mobileError}
+
                                     {existingLead && (
                                         <>
                                             <br />
+
                                             <span
                                                 onClick={() =>
                                                     navigate("/leads", {
-                                                        state: { searchMobile: existingLead.crm_mobile }
+                                                        state: {
+                                                            searchMobile:
+                                                                existingLead.crm_mobile,
+                                                        },
                                                     })
                                                 }
                                                 style={{
-                                                    color: "#1976d2",
+                                                    color: "#c89040",
                                                     cursor: "pointer",
                                                     fontSize: "12px",
-                                                    textDecoration: "underline"
+                                                    textDecoration: "underline",
                                                 }}
                                             >
-                                                View Lead: {existingLead.name}
+                                                View Lead:{" "}
+                                                {existingLead.name}
                                             </span>
-
                                         </>
                                     )}
                                 </span>
                             )
                         }
+                        sx={inputStyle}
                     />
+
                     <TextField
                         fullWidth
                         label="Alternate Mobile No."
                         name="crm_alternate_mobile"
                         value={fk.values.crm_alternate_mobile}
                         onChange={fk.handleChange}
-                    // error={fk.touched.crm_alternate_mobile && Boolean(fk.errors.crm_alternate_mobile)}
-                    // helperText={fk.touched.crm_alternate_mobile && fk.errors.crm_alternate_mobile}
+                        sx={inputStyle}
                     />
 
                     <TextField
@@ -179,26 +241,17 @@ const CreateLead = () => {
                         name="crm_email"
                         value={fk.values.crm_email}
                         onChange={fk.handleChange}
-                        error={fk.touched.crm_email && Boolean(fk.errors.crm_email)}
-                        helperText={fk.touched.crm_email && fk.errors.crm_email}
+                        sx={inputStyle}
                     />
 
-                   
-                       <TextField
+                    <TextField
                         select
                         fullWidth
                         label="Select Service"
                         name="crm_service_type"
-                        value={
-                            services?.data?.some(
-                                (item) => item.service_type_name === fk.values.crm_service_type
-                            )
-                                ? fk.values.crm_service_type
-                                : ""
-                        }
+                        value={fk.values.crm_service_type}
                         onChange={fk.handleChange}
-                        error={fk.touched.crm_service_type && Boolean(fk.errors.crm_service_type)}
-                        helperText={fk.touched.crm_service_type && fk.errors.crm_service_type}
+                        sx={inputStyle}
                     >
                         {services?.data?.map((item) => (
                             <MenuItem
@@ -216,8 +269,7 @@ const CreateLead = () => {
                         name="crm_requirement"
                         value={fk.values.crm_requirement}
                         onChange={fk.handleChange}
-                        error={fk.touched.crm_requirement && Boolean(fk.errors.crm_requirement)}
-                        helperText={fk.touched.crm_requirement && fk.errors.crm_requirement}
+                        sx={inputStyle}
                     />
 
                     <TextField
@@ -227,48 +279,90 @@ const CreateLead = () => {
                         value={fk.values.crm_secondary_status}
                         onChange={fk.handleChange}
                         disabled={isEdit}
-                        helperText={isEdit ? "Remark cannot be edited while updating lead" : ""}
+                        helperText={
+                            isEdit
+                                ? "Remark cannot be edited while updating lead"
+                                : ""
+                        }
+                        sx={inputStyle}
                     />
+
                     <TextField
                         fullWidth
                         label="Source"
                         name="crm_source"
                         value={fk.values.crm_source}
                         onChange={fk.handleChange}
+                        sx={inputStyle}
                     />
 
                     <TextField
                         fullWidth
-                        type="text"
                         label="Project Budget"
                         name="crm_budget"
                         value={fk.values.crm_budget}
                         onChange={fk.handleChange}
+                        sx={inputStyle}
                     />
 
                     <TextField
                         fullWidth
-                        label="Address (Optional)"
+                        label="Address"
                         name="crm_address"
                         value={fk.values.crm_address}
                         onChange={fk.handleChange}
+                        multiline
+                        rows={3}
+                        sx={inputStyle}
                     />
-
                 </div>
-                <div className="flex justify-end gap-3 mt-5">
-                    <Button variant="contained" color="error" onClick={() => fk.resetForm()}>
+
+                <div className="flex justify-end gap-4 mt-8">
+
+                    <Button
+                        variant="outlined"
+                        onClick={() => fk.resetForm()}
+                        sx={{
+                            borderColor: "var(--primary)",
+                            color: "var(--primary)",
+                            px: 4,
+                            py: 1.2,
+                            borderRadius: "10px",
+                            fontWeight: "600",
+
+                            "&:hover": {
+                                borderColor: "var(--primary-hover)",
+                                background: "rgba(200,144,64,0.1)",
+                            },
+                        }}
+                    >
                         Clear
                     </Button>
+
                     <Button
                         variant="contained"
-                        color="success"
                         onClick={fk.handleSubmit}
                         disabled={Boolean(mobileError) || existingLead}
+                        sx={{
+                            background: "var(--primary)",
+                            color: "#000",
+                            px: 4,
+                            py: 1.2,
+                            borderRadius: "10px",
+                            fontWeight: "700",
+
+                            "&:hover": {
+                                background: "var(--primary-hover)",
+                            },
+
+                            "&.Mui-disabled": {
+                                background: "#555",
+                                color: "#aaa",
+                            },
+                        }}
                     >
                         {lead?.id ? "Update" : "Submit"}
                     </Button>
-
-
                 </div>
             </div>
         </div>

@@ -4,10 +4,12 @@ import { FilterAlt, FileDownload } from "@mui/icons-material";
 
 const CustomFilter = ({ formik, onFilter, onClear, onExport }) => {
   return (
-    <div className="grid grid-cols-2 sm:flex gap-3 md:gap-3 px-3 py-1 bg-[#EBE9FD] bg-opacity-45 mb-5">
-      
-      <div className="flex">
-        <span className="text-xs text-center mr-3">From:</span>
+    <div
+      className="grid grid-cols-2 sm:flex gap-3 md:gap-3 px-3 py-1 mb-5"
+      style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border)' }}
+    >
+      <div className="flex items-center">
+        <span className="text-xs text-center mr-3" style={{ color: 'var(--text-muted)' }}>From:</span>
         <TextField
           size="small"
           type="date"
@@ -16,11 +18,20 @@ const CustomFilter = ({ formik, onFilter, onClear, onExport }) => {
           value={formik.values.start_date}
           onChange={formik.handleChange}
           className="!min-w-[110px] !md:min-w-[200px]"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              color: 'var(--text-main)',
+              '& fieldset': { borderColor: 'var(--border)' },
+              '&:hover fieldset': { borderColor: 'var(--primary)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+            },
+            '& input::-webkit-calendar-picker-indicator': { filter: 'invert(0.7)' },
+          }}
         />
       </div>
 
-      <div className="flex">
-        <span className="text-xs text-center mr-3">To:</span>
+      <div className="flex items-center">
+        <span className="text-xs text-center mr-3" style={{ color: 'var(--text-muted)' }}>To:</span>
         <TextField
           size="small"
           type="date"
@@ -29,6 +40,15 @@ const CustomFilter = ({ formik, onFilter, onClear, onExport }) => {
           value={formik.values.end_date}
           onChange={formik.handleChange}
           className="!min-w-[110px] !md:min-w-[200px]"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              color: 'var(--text-main)',
+              '& fieldset': { borderColor: 'var(--border)' },
+              '&:hover fieldset': { borderColor: 'var(--primary)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+            },
+            '& input::-webkit-calendar-picker-indicator': { filter: 'invert(0.7)' },
+          }}
         />
       </div>
 
@@ -41,6 +61,15 @@ const CustomFilter = ({ formik, onFilter, onClear, onExport }) => {
           placeholder="Search"
           value={formik.values.search}
           onChange={formik.handleChange}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              color: 'var(--text-main)',
+              '& fieldset': { borderColor: 'var(--border)' },
+              '&:hover fieldset': { borderColor: 'var(--primary)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+            },
+            '& input::placeholder': { color: 'var(--text-muted)' },
+          }}
         />
       </div>
 
@@ -49,6 +78,12 @@ const CustomFilter = ({ formik, onFilter, onClear, onExport }) => {
           onClick={onFilter}
           variant="contained"
           startIcon={<FilterAlt />}
+          sx={{
+            backgroundColor: 'var(--primary)',
+            color: '#000',
+            fontWeight: 600,
+            '&:hover': { backgroundColor: 'var(--primary-hover)' },
+          }}
         >
           Filter
         </Button>
@@ -56,19 +91,14 @@ const CustomFilter = ({ formik, onFilter, onClear, onExport }) => {
         <Button
           onClick={onClear}
           variant="outlined"
-          color="secondary"
+          sx={{
+            borderColor: 'var(--border)',
+            color: 'var(--text-muted)',
+            '&:hover': { borderColor: 'var(--primary)', color: 'var(--primary)' },
+          }}
         >
           Clear
         </Button>
-
-        {/* <Button
-          onClick={onExport}
-          variant="contained"
-          color="success"
-          startIcon={<FileDownload />}
-        >
-          Export
-        </Button> */}
       </div>
     </div>
   );

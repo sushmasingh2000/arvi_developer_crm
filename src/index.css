@@ -9,15 +9,17 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;             /* Chrome, Safari */
 }
+/* index.css ya App.css mein yeh add karo */
 :root {
   --primary: #c89040;
   --primary-hover: #b27d34;
-
   --bg-dark: rgba(0,0,0,0.75);
   --card-bg: rgba(0,0,0,0.6);
   --input-bg: rgba(255,255,255,0.05);
+  --text-main: #f0e6d0;
+  --text-muted: #a09070;
+  --border: rgba(200,144,64,0.18);
 }
-
 body {
   margin: 0;
   font-family: "Plus Jakarta Sans", sans-serif;

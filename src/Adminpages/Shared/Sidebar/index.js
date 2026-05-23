@@ -11,14 +11,13 @@ import {
 import classNames from "classnames";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import loginLogo from "../../../assets/favicon.png";
+import loginLogo from "../../../assets/mobile_logo-removebg-preview.png";
 import { all_Data } from "../../mockdata/MockData";
 
 const Sidebar = () => {
   const navigate = useNavigate();
 
   const [openSlide, setOpenSlide] = useState(true);
-  // const [openCollapse, setOpenCollapse] = useState({});
 
   const [openCollapse, setOpenCollapse] = useState(() => {
     const initialState = {};
@@ -39,17 +38,17 @@ const Sidebar = () => {
 
   return (
     <List
-      className={`${openSlide ? "!min-w-[16vw] max-w-[16vw]" : "!w-auto"
-        }  shadow-md   !h-screen  !relative !overflow-y-auto !p-2 glass !bg-white !bg-opacity-50`}
+      className={`${openSlide ? "!min-w-[16vw] max-w-[16vw]" : "!w-auto"} shadow-md !h-screen !relative !overflow-y-auto !p-2 glass`}
+      style={{ backgroundColor: 'var(--card-bg)' }}
     >
       <ListItem className="!py-3 !flex !justify-center">
         {openSlide ? (
-          <img alt="" className="Capture !w-14" src={loginLogo} />
+          <img alt="" className="Capture !w-28" src={loginLogo} />
         ) : (
-          <img alt="" className="Capture !w-7 py-8" src={loginLogo} />
+          <img alt="" className="Capture !w-16 py-8" src={loginLogo} />
         )}
       </ListItem>
-      <Divider />
+      <Divider sx={{ borderColor: 'var(--primary)', opacity: 0.3 }} />
 
       {all_Data?.map((nav) => (
         <React.Fragment key={nav.id}>
@@ -60,12 +59,15 @@ const Sidebar = () => {
                 handleCollapse(nav.navLink);
               }
             }}
-            className={classNames(
-              "!rounded-lg !p-2",
-              window.location.pathname === nav.navLink && "!text-[#0561FC]"
-            )}
+            className={classNames("!rounded-lg !p-2")}
+            sx={{
+              color: window.location.pathname === nav.navLink ? 'var(--primary)' : 'var(--text-main)',
+              '&:hover': { backgroundColor: 'var(--input-bg)' },
+            }}
           >
-            <ListItemIcon>{nav.navIcon}</ListItemIcon>
+            <ListItemIcon sx={{ color: window.location.pathname === nav.navLink ? 'var(--primary)' : 'var(--text-muted)' }}>
+              {nav.navIcon}
+            </ListItemIcon>
             <ListItemText primary={nav.navItem} />
             {nav.subcomponent?.length > 0 && (
               <span>
@@ -79,33 +81,38 @@ const Sidebar = () => {
                 <ListItemButton
                   key={subNav.id}
                   onClick={() => navigate(subNav.navLink)}
-                  className={classNames(
-                    "!rounded-lg",
-                    window.location.pathname === subNav.navLink &&
-                    "!text-[#0561FC]"
-                  )}
-                  sx={{ pl: 4 }}
+                  className={classNames("!rounded-lg")}
+                  sx={{
+                    pl: 4,
+                    color: window.location.pathname === subNav.navLink ? 'var(--primary)' : 'var(--text-muted)',
+                    '&:hover': { backgroundColor: 'var(--input-bg)' },
+                  }}
                 >
-                  <ListItemIcon>{subNav.navIcon}</ListItemIcon>
+                  <ListItemIcon sx={{ color: window.location.pathname === subNav.navLink ? 'var(--primary)' : 'var(--text-muted)' }}>
+                    {subNav.navIcon}
+                  </ListItemIcon>
                   <ListItemText primary={subNav.navItem} />
                 </ListItemButton>
               ))}
-
             </List>
           </Collapse>
         </React.Fragment>
       ))}
-      <List className="!text-red-800 font-extrabold">
+
+      <List>
         <ListItemButton
-        className=""
           onClick={() => {
             localStorage.clear();
             sessionStorage.clear();
-            navigate("/")
+            navigate("/");
+          }}
+          sx={{
+            color: '#d44',
+            '&:hover': { backgroundColor: 'rgba(200,60,60,0.1)' },
           }}
         >
-          <ListItemIcon className="!text-red-800"><Logout /></ListItemIcon>
-          <ListItemText  primary={"Logout"} />
+          <ListItemIcon sx={{ color: '#d44' }}><Logout /></ListItemIcon>
+          <ListItemText primary={"Logout"} />
         </ListItemButton>
       </List>
     </List>

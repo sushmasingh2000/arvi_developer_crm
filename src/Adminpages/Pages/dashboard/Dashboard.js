@@ -29,20 +29,15 @@ const Dashboard = () => {
 
   const isLeadVisibleOnDashboard = (lead) => {
     const today = moment().startOf("day");
-
     const blockedStatuses = ["Rejected", "Deal Success"];
-    if (blockedStatuses.includes(lead.current_status)) {
-      return false;
-    }
-
+    if (blockedStatuses.includes(lead.current_status)) return false;
     const baseDate = lead.followup_created_at
       ? moment(lead.followup_created_at)
       : moment(lead.crm_created_at);
-
     const expiryDate = baseDate.clone().add(5, "days").endOf("day");
-
     return today.isSameOrBefore(expiryDate);
   };
+
   const navigate = useNavigate();
   const fk = useFormik({
     initialValues: {
@@ -53,6 +48,7 @@ const Dashboard = () => {
     },
     onSubmit: () => setCurrentPage(1),
   });
+
   const { data: leads } = useQuery(
     ["dashboar_leads", fk.values.search, fk.values.status, fk.values.start_date, fk.values.end_date, currentPage],
     () => axiosInstance.post(API_URLS.lead_list, {
@@ -68,7 +64,6 @@ const Dashboard = () => {
 
   const followups = leads?.data?.response?.data?.filter(isLeadVisibleOnDashboard) || [];
 
-
   const tableHead = [
     "S.No.",
     "Lead Date / Time",
@@ -83,20 +78,14 @@ const Dashboard = () => {
   const tableRow = followups.map((f, idx) => [
     <span className="flex gap-2">
       {idx + 1},
-      {userRole !== "admin" &&
-        (!f.current_status) && (
-          <span className="bg-green-600 text-white text-[10px] px-2  rounded-full">
-            NEW
-          </span>
-        )}
+      {userRole !== "admin" && (!f.current_status) && (
+        <span className="bg-green-600 text-white text-[10px] px-2 rounded-full">
+          NEW
+        </span>
+      )}
     </span>,
-
-    f.crm_created_at
-      ? moment(f.crm_created_at).format("YYYY-MM-DD HH:mm:ss")
-      : "--",
-    f.followup_created_at
-      ? moment(f.followup_created_at).format("YYYY-MM-DD HH:mm:ss")
-      : "--",
+    f.crm_created_at ? moment(f.crm_created_at).format("YYYY-MM-DD HH:mm:ss") : "--",
+    f.followup_created_at ? moment(f.followup_created_at).format("YYYY-MM-DD HH:mm:ss") : "--",
     <Button
       className="!bg-green-600 !text-white"
       onClick={() => {
@@ -114,31 +103,30 @@ const Dashboard = () => {
 
   const { data: statusList } = useQuery(
     ["get_followup_master"],
-    () =>
-      axiosInstance.post(API_URLS.get_followup_master, {
-        count: 100000,
-        status: 1,
-      }),
+    () => axiosInstance.post(API_URLS.get_followup_master, { count: 100000, status: 1 }),
     { refetchOnWindowFocus: false }
   );
 
   const status = statusList?.data?.response || [];
-  // Basic fixed cards
+
+  // ✅ CHANGE 1 — icon color: #2a2785 → var(--primary)
   const baseStats = [
-    { label: "Total Leads", icon: <PersonPin className="!h-[3rem] !w-[3rem] !text-[#2a2785]" />, value: dashboard.total_leads || 0 },
-    // { label: "Total Owners", icon: <PersonPin className="!h-[3rem] !w-[3rem] !text-[#2a2785]" />, value: dashboard.total_owners || 0 },
-    { label: "Total Follow-ups", icon: <PersonPin className="!h-[3rem] !w-[3rem] !text-[#2a2785]" />, value: dashboard.leads_with_followup || 0 },
+    { label: "Total Leads", icon: <PersonPin style={{ color: 'var(--primary)', height: '3rem', width: '3rem' }} />, value: dashboard.total_leads || 0 },
+    { label: "Total Follow-ups", icon: <PersonPin style={{ color: 'var(--primary)', height: '3rem', width: '3rem' }} />, value: dashboard.leads_with_followup || 0 },
   ];
 
   const statusStats = dashboard.status_wise_followup?.map((item) => ({
     label: item.crm_status,
     value: item.total,
-    icon: <PersonPin className="!h-[3rem] !w-[3rem] !text-[#2a2785]" />,
+    // ✅ CHANGE 2 — same here
+    icon: <PersonPin style={{ color: 'var(--primary)', height: '3rem', width: '3rem' }} />,
   })) || [];
 
   const stats = [...baseStats, ...statusStats];
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching data</p>;
+
   return (
     <div className="h-screen overflow-y-auto px-4">
       <>
@@ -149,23 +137,23 @@ const Dashboard = () => {
               onClick={() => {
                 navigate("/leads", {
                   state: {
-                    status: i.label === "Total Leads" || i.label === "Total Follow-ups"
-                      ? ""
-                      : i.label
+                    status: i.label === "Total Leads" || i.label === "Total Follow-ups" ? "" : i.label
                   }
                 });
               }}
-
-              className="text-center bg-white bg-opacity-65 rounded-lg py-1 cursor-pointer hover:shadow-lg transition duration-200"
+              // ✅ CHANGE 3 — bg-white bg-opacity-65 → var(--card-bg), text-blue-700 → var(--primary)
+              className="text-center rounded-lg py-1 cursor-pointer hover:shadow-lg transition duration-200"
+              style={{ backgroundColor: 'var(--card-bg)', border: '1px solid rgba(200,144,64,0.18)' }}
             >
               <div className="text pt-1 font-bold">{i.icon}</div>
-              <p className="font-bold text-sm">{i.label || "New"}</p>
-              <p className="font-extrabold text-blue-700 text-lg">{i.value}</p>
+              <p className="font-bold text-sm" style={{ color: 'var(--text-muted)' }}>{i.label || "New"}</p>
+              <p className="font-extrabold text-lg" style={{ color: 'var(--primary)' }}>{i.value}</p>
             </div>
           ))}
         </div>
 
         <TodayFolowup />
+
         <Dialog
           open={openFollowup}
           onClose={() => setOpenFollowup(false)}
@@ -178,7 +166,6 @@ const Dashboard = () => {
               <Close />
             </IconButton>
           </DialogTitle>
-
           <DialogContent
             dividers
             sx={{
@@ -188,15 +175,12 @@ const Dashboard = () => {
               padding: 0,
             }}
           >
-            {selectedLeadId && (
-              <FollowupList leadId={selectedLeadId} />
-            )}
+            {selectedLeadId && <FollowupList leadId={selectedLeadId} />}
           </DialogContent>
         </Dialog>
       </>
     </div>
   );
-
 };
 
 export default Dashboard;

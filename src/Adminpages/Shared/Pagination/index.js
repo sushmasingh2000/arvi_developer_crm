@@ -8,13 +8,16 @@ const CustomToPagination = ({ setPage, page, data }) => {
   const currentPage = data?.currPage || 1;
 
   return (
-    <div className="bg-gray-200 w-full flex flex-col sm:flex-row items-center justify-between sm:justify-end gap-2 sm:gap-4  rounded mt-4">
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-sm sm:text-base text-black">
-        <span className="font-semibold text-dark-color ">
-          Total Pages: <span className="text-black">{totalPages}</span>
+    <div
+      className="w-full flex flex-col sm:flex-row items-center justify-between sm:justify-end gap-2 sm:gap-4 rounded mt-4"
+      style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border)', padding: '8px 12px' }}
+    >
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-sm sm:text-base">
+        <span className="font-semibold" style={{ color: 'var(--text-muted)' }}>
+          Total Pages: <span style={{ color: 'var(--text-main)' }}>{totalPages}</span>
         </span>
-        <span className="font-semibold text-dark-color">
-          Current Page: <span className="text-black">{currentPage}</span>
+        <span className="font-semibold" style={{ color: 'var(--text-muted)' }}>
+          Current Page: <span style={{ color: 'var(--text-main)' }}>{currentPage}</span>
         </span>
       </div>
 
@@ -22,23 +25,19 @@ const CustomToPagination = ({ setPage, page, data }) => {
         <IconButton
           onClick={() => setPage(page - 1)}
           disabled={page === 1}
-          className={`transition-transform duration-200 rounded-full ${page <= 1
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:scale-110"
-            }`}
+          className={`transition-transform duration-200 rounded-full ${page <= 1 ? "opacity-50 cursor-not-allowed" : "hover:scale-110"}`}
+          sx={{ color: 'var(--primary)' }}
         >
-          <ChevronLeftIcon className="text-black" />
+          <ChevronLeftIcon />
         </IconButton>
 
         <IconButton
           onClick={() => setPage(page + 1)}
           disabled={page >= totalPages}
-          className={`transition-transform duration-200 rounded-full ${page >= totalPages
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:scale-110"
-            }`}
+          className={`transition-transform duration-200 rounded-full ${page >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:scale-110"}`}
+          sx={{ color: 'var(--primary)' }}
         >
-          <ChevronRightIcon className="text-black" />
+          <ChevronRightIcon />
         </IconButton>
       </div>
     </div>

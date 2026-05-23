@@ -1,6 +1,7 @@
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import {
+    Button,
     TextField
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -12,7 +13,31 @@ import { API_URLS } from "../../config/APIUrls";
 import axiosInstance from "../../config/axios";
 import CustomTable from "../../Shared/CustomTable";
 import CustomToPagination from "../../Shared/Pagination";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
+const fieldSx = {
+    '& .MuiOutlinedInput-root': {
+        color: 'var(--text-main)',
+        '& fieldset': { borderColor: 'var(--border)' },
+        '&:hover fieldset': { borderColor: 'var(--primary)' },
+        '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+    },
+    '& .MuiInputLabel-root': { color: 'var(--text-muted)' },
+    '& .MuiInputLabel-root.Mui-focused': { color: 'var(--primary)' },
+    '& input::-webkit-calendar-picker-indicator': { filter: 'invert(0.7)' },
+    '& .MuiSelect-icon': { color: 'var(--text-muted)' },
+};
+
+const menuProps = {
+    PaperProps: {
+        style: {
+            backgroundColor: 'var(--card-bg)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-main)',
+        }
+    }
+};
 
 const RejectedLeadList = () => {
     const navigate = useNavigate();
@@ -30,7 +55,7 @@ const RejectedLeadList = () => {
             start_date: "",
             end_date: "",
             count: 10,
-            status: ""
+            status: "Rejected"
         },
         onSubmit: () => setCurrentPage(1),
     });
@@ -52,6 +77,9 @@ const RejectedLeadList = () => {
     );
 
     const allData = leadsData?.data?.response || [];
+
+
+
 
     const tableHead = [
         "S.No.",
@@ -91,7 +119,7 @@ const RejectedLeadList = () => {
             ? [<span className="font-semibold">{lead.assigned_employee_name}</span>]
             : []),
         <span className="!text-center"> {lead.crm_lead_name || "--"}</span>,
-        <span className="text-red-800 font-bold">  {lead.current_status || "--"} </span>,
+        <span className="text-green-800 font-bold">  {lead.current_status || "--"} </span>,
         lead.crm_mobile || "--",
         lead.crm_requirement || "--",
         <span
@@ -100,7 +128,7 @@ const RejectedLeadList = () => {
                 navigate(`/payment-history/${lead.id}`, {
                     state: {
                         leadName: lead.crm_lead_name,
-                         requirement : lead.crm_requirement
+                        requirement: lead.crm_requirement
                     }
                 })
             }
@@ -126,28 +154,53 @@ const RejectedLeadList = () => {
     return (
         <div>
             <div className="flex justify-between mb-4">
-                <p className="font-bold text-xl">Rejected Leads</p>
+                <p className="font-bold text-xl" style={{ color: 'var(--text-main)' }}>   Rejected Leads</p>
                 <div></div>
             </div>
             <div className="flex gap-3 mb-4">
-                <TextField
-                    type="date"
-                    value={fk.values.start_date}
-                    onChange={(e) => fk.setFieldValue("start_date", e.target.value)}
-                />
-                <TextField
-                    type="date"
-                    value={fk.values.end_date}
-                    onChange={(e) => fk.setFieldValue("end_date", e.target.value)}
-                />
+                <TextField type="date" value={fk.values.start_date}
+                    onChange={(e) => fk.setFieldValue("start_date", e.target.value)} sx={fieldSx} />
+                <TextField type="date" value={fk.values.end_date}
+                    onChange={(e) => fk.setFieldValue("end_date", e.target.value)} sx={fieldSx} />
+
 
                 <TextField
-                    type="search"
-                    placeholder="Search by name or mobile"
-                    name="search"
-                    value={fk.values.search}
-                    onChange={(e) => fk.setFieldValue("search", e.target.value)} />
+                    type="search" placeholder="Search by name or mobile"
+                    name="search" value={fk.values.search}
+                    onChange={(e) => fk.setFieldValue("search", e.target.value.trimStart())}
+                    sx={fieldSx}
+                />
 
+                <Button
+                    variant="contained"
+                    sx={{
+                        backgroundColor: 'var(--primary)',
+                        color: '#000',
+                        fontWeight: 600,
+                        '&:hover': { backgroundColor: 'var(--primary-hover)' },
+                    }}
+                    onClick={async () => {
+                        try {
+                            const res = await axiosInstance.post(
+                                API_URLS.download_leads_excel,
+                                { start_date: fk.values.start_date, end_date: fk.values.end_date, status: fk.values.status, search: fk.values.search?.trim() },
+                                { responseType: "blob" }
+                            );
+                            const url = window.URL.createObjectURL(new Blob([res.data]));
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.setAttribute("download", `Leads_${Date.now()}.xlsx`);
+                            document.body.appendChild(link);
+                            toast.success("Excel downloaded successfully");
+                            link.click();
+                            link.remove();
+                        } catch {
+                            Swal.fire("Error", "Failed to download Excel", "error");
+                        }
+                    }}
+                >
+                    Download Excel
+                </Button>
             </div>
             <CustomTable
                 tablehead={tableHead}
